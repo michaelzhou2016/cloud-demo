@@ -1,0 +1,12 @@
+server:
+  port: 9401
+spring:
+  application:
+    name: oauth2-service
+  datasource:
+    url: jdbc:mysql://localhost:3306/test?useUnicode=true&characterEncoding=utf8&zeroDateTimeBehavior=convertToNull&useSSL=false&verifyServerCertificate=false&allowMultiQueries=true&serverTimezone=Asia/Shanghai
+    username: root
+    password: tryxycdz30&#
+    driver-class-name: com.mysql.cj.jdbc.Driver
+mybatis:
+  mapper-locations: classpath:mapper/*Dao.xml
