@@ -5,6 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cloud.client.ServiceInstance;
 import org.springframework.cloud.client.discovery.DiscoveryClient;
+import org.springframework.cloud.client.loadbalancer.LoadBalancerClient;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -27,8 +28,10 @@ public class HelloController {
     private RestTemplate restTemplate;
     @Autowired
     private EurekaProviderService eurekaProviderService;
+    @Autowired
+    private LoadBalancerClient loadBalancerClient;
 
-    @GetMapping("/test")
+    @GetMapping("/hello")
     public String hello(@RequestParam String name) {
         List<ServiceInstance> instances = discoveryClient.getInstances("SERVICE-PROVIDER");
         ServiceInstance serviceInstance = instances.get(0);
@@ -37,8 +40,18 @@ public class HelloController {
         return responseEntity.getBody();
     }
 
-    @GetMapping("/test2")
+    @GetMapping("/hello2")
     public String hello2(@RequestParam String name) {
         return eurekaProviderService.hello(name);
+    }
+
+    @GetMapping("/hello3")
+    public String hello3(@RequestParam String name) {
+        log.info("loadBalancerClient:{}", loadBalancerClient.getClass());
+        ServiceInstance serviceInstance = loadBalancerClient.choose("SERVICE-PROVIDER");
+        String url = String.format("%s://%s:%s/hello?name=%s", serviceInstance.isSecure() ? "https" : "http", serviceInstance.getHost(), serviceInstance.getPort(), name);
+        log.info("url:{}", url);
+        ResponseEntity<String> responseEntity = restTemplate.getForEntity(url, String.class);
+        return responseEntity.getBody();
     }
 }
